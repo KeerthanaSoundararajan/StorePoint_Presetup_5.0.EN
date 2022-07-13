@@ -1,0 +1,215 @@
+﻿<File version="3.1">
+  <Code><![CDATA[<#
+.NOTES 
+  Created with: SAPIEN Technologies, Inc., PowerShell Studio 2012 v3.1.34
+  Created on:   2014-02-18 13:10
+  Created by:   Dennis Lindqvist
+  Organization: 
+  Filename: 
+
+  Requirements:
+	o	PowerShell v2.0 x86 or x64
+
+  Dependencies:
+	[Dependencies here]
+
+  Aliases used:
+	POS_Logging	-	$LogLevel. 0 - None, 1 - Basic, 2- -Normal, 3 - Verbose, 4 - Diagnostic, 5 - Debug
+	REG_GeoID	-	$REG_GeoID. Geographical country location
+       
+	POS_STP_BusinessUnitName	- Used only if BOS is in another site than tills
+	POS_STP_ServerName			- BOS server name
+	POS_STP_SiteID				- For trouble shooting only
+	POS_STP_SiteName			- For trouble shooting only
+	POS_STP_DownloadPricebook	- Optional. If set, waits for SOSIF to download Pricebook
+
+	POS_STP_TerminalID -	Terminal POS ID used by BOS for tills found in site and by POS.
+
+	POS_STP_Group	-	$GroupID      
+			# 0	Calypso
+			# 1	Restaurant
+			# 2	Bistro
+			# 3	SFM (Swedish Food Market)
+			# 4	Cafe
+			# 5	Staff
+			# 6	External
+
+
+  Known issues:
+	Doesn't work fully on ICC3
+	Get-ICCAlias only get aliases from the current site profiles and the computer AD object
+	runas.exe /trustlevel:0x10000 wakeup.exe only works with Windows 2008
+
+  Online Help: 
+	http://technet.microsoft.com/en-us/magazine/hh500719.aspx
+
+  Rev 0.1.0.3	2014-02-18 13:10	Initial version
+  Rev 0.1.0.6	14:52 2014-02-18	Handles missing archive collections
+  Rev 0.1.0.10	13:56 2014-02-20	Force Run Idem WakeUp as basic user
+  Rev 0.1.0.11	19:01 2014-02-20	Populated Pre-BOS setup parameters
+  Rev 0.1.0.14	20:34 2014-02-20	GeoID hash table inserted
+  Rev 0.1.0.17	10:20 2014-02-21	Wake IDEM without trustlevel on ICC3
+  Rev 0.1.0.18	16:46 2014-02-21	Added Netstat
+  Rev 0.1.0.19	17:01 2014-02-24	Calculates SiteName and SiteID based on Computername
+  Rev 0.1.0.21	17:16 2014-02-24	Use RationalInstallType as failback alias until BOS_STP_Type has been configured in IMU
+  Rev 0.1.0.23	18:11 2014-02-24	Added GroupID and LocationID
+  Rev 0.1.0.24	20:09 2014-02-24	Calculates Server or Client based on Computername
+  Rev 0.1.0.28	20:24 2014-02-24	Changed POS Subkeys into POS Value Names
+  Rev 0.1.0.33	20:46 2014-02-24	Added NumberOfTills
+  Rev 0.1.0.36	15:40 2014-02-25	Workaround for Server not beeing in same site as tills ($POS_SiteName)
+  Rev 0.1.0.38	16:55 2014-02-25	Changed extraction of SiteID from "3,3" to "length -3,3"
+  Rev 0.1.0.39	17:36 2014-02-25	Added BOSSERVER for Client setup
+  Rev 0.1.0.41	19:49 2014-02-25	Added support for IFSSITENAME and ChannelNumber
+  Rev 0.1.0.42	21:18 2014-02-25	Added POS_STP_TerminalID alias checkrunas.exe /trustlevel:0x10000 wakeup.exe only works with Windows 2008
+  Rev 0.1.0.46	21:45 2014-02-25	Differentiate between BOS, BOS Client and POS pre-configuration
+  Rev 0.1.0.60	16:51 2014-02-26	Added Get-Alias -ComputerName -AliasName
+  Rev 0.1.0.63	23:03 2014-02-26	Added TerminalNames for Calypso
+  Rev 0.1.0.64	22:21 2014-02-28	Fallback TerminalID based on order of discovery
+  Rev 0.1.0.65	12:43 2014-03-01	Calls Storepoint_FTP_Config (x64)
+  Rev 0.1.0.67	15:27 2014-03-03	Error corrections in TerminalID function
+  Rev 0.1.0.69	16:47 2014-03-03	Error corrections in GroupID
+  Rev 0.1.0.72	17:07 2014-03-03	Get-ICCalias didn't searched "to install computers"
+  Rev 0.1.0.73	17:52 2014-03-03	Calypso check for Terminal Name fixed.
+  Rev 0.1.0.79	16:32 2014-03-04	Wait for /Rcv content and then for FTP session to end
+  Rev 0.1.0.82	17:33 2014-03-04	Fixed StopWatch() not using TotalSeconds
+  Rev 0.1.0.84	11:06 2014-03-11	As HQImport looks in c:\Program Files\Office\Rcv, the path had to be altered
+  Rev 0.1.0.85	13:54 2014-03-21	Removed BOS Client from waiting for PriceBook
+  Rev 0.1.0.87	21:31 2014-04-28	Added time out for SOSIF FTP download
+  Rev 0.1.0.88	22:40 2014-04-28	Changed ProgramFiles to 64-bit by running as 64 bit script as Retalix fauled :(
+  Rev 0.2.0.89	14:37 2014-07-22	Converted to project
+  Rev 0.2.0.93	21:27 2014-07-27	Wait for SOSIF used %Programfiles% related info instead of $POS_STP_PriceBook
+  Rev 0.2.0.94	21:56 2014-07-27	TimeOut logging was comparing LE instead of GT
+  Rev 0.2.0.95	08:10 2014-07-28	SOSIF timeout now depends on domain (IKEADT - 30 min, Other - 120 min)
+  Rev 0.2.0.96	11:54 2014-07-28	Renamed all $BOS_ variables to $POS_
+  Rev 0.2.0.97	12:29 2014-07-28	Added true POS aliases for BOS and changed old aliases to fallback
+  Rev 0.2.0.101	12:29 2014-07-28	Implemented $POS_DownloadPricebook condition flag
+  Rev 0.2.0.111	13:46 2014-07-28	Filter out tills not belonging to BOS Server
+  Rev 0.2.0.116	16:21 2014-07-28	Filter out tills missing terminalnumber
+  Rev 0.2.0.118	18:51 2014-07-28	Convert to Bool only works with numerical values, Using .Net instead
+  Rev 0.3.0.119	15:47 2014-10-01	Removed legacy aliases
+  Rev 0.3.0.120	21:05 2014-10-01	Handle $POS_SiteID containing letters and not only digits
+  Rev 0.3.0.121	21:51 2014-10-01	Fixed $GroupID beeing handled as Site information
+  Rev 0.3.0.122	11:23 2014-10-02	Fixed Calypso GroupID detection.
+  Rev 1.0.1.123	17:48 2015-01-26	Applied sequential POS numbering
+  Rev 1.0.1.125	19:53 2015-01-26	Added AutoStoreID debuging
+  Rev 1.0.1.128	20:53 2015-01-26	Changed alias fetch to use Get-LocalAlias()
+  Rev 1.0.1.130	21:23 2015-01-26	Added auto calculate for TerminalID
+  Rev 1.0.1.133	22:17 2015-01-26	Added Till SiteID verification
+  Rev 1.0.1.134	14:04 2015-01-27	SiteID verification requires all alias hierarchy to be elevated.
+  Rev 1.0.1.136	14:15 2015-01-27	Added check for $STP_POS_ServerName missing
+  Rev 1.0.1.137	14:35 2015-01-27	Filtered check PricebookDownload to only use nt4 machines
+  Rev 1.0.1.139	14:36 2015-01-27	One StopWatch end too many removed.
+  Rev 1.0.1.141	14:08 2015-02-23	Clear up any previous registry data
+  Rev 1.0.1.142	16:32 2015-03-03	Added support for new alias POS_STP_FiscalState
+  Rev 2.0.0.143	14:52 2015-06-04	Uppgraded version number and rebuilt using latest IFS-Lib
+  Rev 2.0.0.144	18:46 2015-07-03	Fixed "Client" not used vith TS presetup (NT1, ie. not NT4)
+  Rev 2.0.1.145	17:03 2015-10-08	Moved functions to Global and wrote comment-based help
+  Rev 3.0.0.146 12:23 2017-24-01    Added Missing Sales Alias into registry
+  Rev 3.0.0.147	15:23 2017-02-03	Added -Force to Remove-RegKey as required in the updated IFS lib
+  Rev 3.0.0.148	11:26 2017-02-14	Fixed Missing sales "NT4" condition in Set-Presetup()
+  									Removed call to Remove-Presetup() as it should be conditional
+  Rev 3.0.0.149	15:24 2017-02-14	Fixed get Missing Sales aliases in Set-ScriptVariable()
+  Rev 3.0.0.151	15:42 2017-02-14	Fixed using $MissingSalesRegKey when setting Missing Sales
+  Rev 3.0.0.153	21:36 2017-02-14	Added smart alias handling of SOSIF UserName and UserPass
+  Rev 3.0.0.154	19:33 2017-02-16	UserPass updated with correct values
+
+TODO:
+	Wait for BOS (will be partly handled by Cold Start)
+	
+
+.SYNOPSIS
+  [Short description]
+
+.DESCRIPTION
+  [Long description]
+
+.PARAMETER [None]
+  [Paramters and syntax for script]
+
+.EXAMPLE
+  [Examples of using script]
+  [Just add more EXAMPLE]
+
+
+.INPUTS 
+  Fetches data from aliases and AD in the sister OU Clients to the machine the script is running on.
+ 
+.OUTPUTS 
+  Creates a regkey for each POS in HKLM:SOFTWARE\Positive\Wow6432Node\VersionControl\BOSConfig or
+  HKLM:SOFTWARE\Positive\Wow6432Node\VersionControl\POSConfig
+#>
+
+#Define a Param block to use custom parameters in the project
+#Param ($CustomParameter)
+
+function Main {
+	Param ([String]$Commandline)
+	#Note: This function starts the application
+	#Note: $Commandline contains the complete argument string passed to the packager
+	#Note: To get the script directory in the Packager use: Split-Path $hostinvocation.MyCommand.path
+	#Note: To get the console output in the Packager (Windows Mode) use: $ConsoleOutput (Type: System.Collections.ArrayList)
+	#TODO: Initialize and add Function calls to forms
+	$Script:StopWatch = [System.Diagnostics.StopWatch]::StartNew()
+	
+	[string]$global:MyVersion = "3,0,0,154"
+	
+	
+		
+	# Init
+	Add-Log "Start" -Level 1
+	Add-Log "IFS PS Library version: $IfsPsLibVer"
+
+	$AliasRegKey = "HKLM:\SOFTWARE\IKEA\IDEM\Config\Aliases"
+
+	Set-ScriptVariable
+
+# End Init
+
+
+# Main
+
+	# Remove-Presetup # This is conditionally handled by the module instead
+	
+	Set-Presetup
+		
+	# Setup FTP on BOS
+	if ($ENV:COMPUTERNAME -like "*nt4*") # BOS, configure FTP
+		{
+		Invoke-FtpConfig
+	}# end if
+
+	# If SOSIF Pricebook DL specified, wait for download. $Timeout used.
+	if ($ENV:COMPUTERNAME -like "*nt4*" -and $POS_DownloadPricebook) #BOS, 
+		{
+		Wait-FtpSessionStart
+		Wait-SosifContent
+		Wait-FtpSessionEnd
+	}# end if
+
+# End Main
+
+
+# Exit
+	$StopWatch.Stop()
+	Add-Log (Get-ExecutionTime $StopWatch) -Level 1
+	
+	$global:ExitCode = 0 #Set the exit code for the Packager
+# End Exit
+}
+
+
+
+
+
+
+]]></Code>
+  <Assemblies>
+    <Assembly>mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Assembly>
+    <Assembly>System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+  </Assemblies>
+</File>

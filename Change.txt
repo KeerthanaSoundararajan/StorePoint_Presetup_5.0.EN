@@ -1,0 +1,54 @@
+15:30 2017-02-14
+================
+Media updated
+  Storepoint_Presetup.exe	v3.0.0.148 ->  b3.0.0.151
+
+
+11:46 2017-02-14
+================
+Media updated
+  Storepoint_Presetup.exe	v3.0.0.147 ->  b3.0.0.148
+
+
+
+15:31 2017-02-03
+================
+Media update
+  Storepoint_Presetup.exe	v2.0.0.145 -> v3.0.0.147
+  
+
+13:22 2017-01-12
+================
+Setup instructions modified.
+
+This section in Setup
+
+On x64 machines, remove registry subkeys if they exist
+  HKLM\SOFTWARE\Wow6432Node\Positive\VersionControl
+  HKLM\SOFTWARE\Wow6432Node\RetalixInstallShield
+
+On x86 machines, remove registry subkeys if they exist
+  HKLM\SOFTWARE\Positive\VersionControl
+  HKLM\SOFTWARE\RetalixInstallShield
+
+changed to
+
+On x64 machines, if reg key 
+  HKLM\SOFTWARE\Wow6432Node\StorePoint\ 
+*doesn't* exist remove registry subkeys
+  HKLM\SOFTWARE\Wow6432Node\Positive\VersionControl
+  HKLM\SOFTWARE\Wow6432Node\RetalixInstallShield
+
+On x86 machines, if reg key 
+  HKLM\SOFTWARE\StorePoint\ 
+*doesn't* exist remove registry subkey
+  HKLM\SOFTWARE\Positive\VersionControl
+  HKLM\SOFTWARE\RetalixInstallShield
+
+Same as in the uninstall section.
+
+
+12:51 2016-12-05
+================
+Media updated
+  Storepoint_Delegate.exe	build 3.0.0.19 -> build 3.0.0.21 

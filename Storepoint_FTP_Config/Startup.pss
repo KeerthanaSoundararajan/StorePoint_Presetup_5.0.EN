@@ -1,0 +1,183 @@
+﻿<File version="2.1">
+  <Code><![CDATA[<#
+.NOTES 
+  Created with: SAPIEN Technologies, Inc., PowerShell Studio 2012 v3.1.35
+  Created on:   2014-02-27 20:54
+  Created by:   Dennis Lindqvist
+  Organization: 
+  Filename: 
+
+  Requirements:
+	o	PowerShell v2.0 x86
+
+  Dependencies:
+	[Dependencies here]
+
+  Aliases used:
+	[ICC4 specific registry settings used by the script]
+
+  Known issues:
+	Doesn't work  fully on ICC3
+	Get-ICCAlias only get aliases from the current site and the local computer
+
+  Online Help: 
+	http://technet.microsoft.com/en-us/magazine/hh500719.aspx
+
+  Rev 0.1.0.1	2014-02-18 13:10	Initial version
+  Rev 0.1.0.2	21:47 2014-02-27	New-WebFtpSite
+  Rev 0.1.0.3	13:03 2014-02-28	Removed New-WebFtpSite
+  Rev 0.1.0.5	17:50 2014-02-28	Created PriceBook folders and FTP Virtual Directories
+  Rev 0.1.0.6	00:31 2014-03-01	Cracked null logging level
+  Rev 0.1.0.10	04:37 2014-03-01	Set Virtual Directories to Visible (DisplayVirtualDirectories, 32)
+  Rev 0.1.0.12	03:01 2014-03-02	Added IPaddress restrictions
+  Rev 0.1.0.15	20:46 2014-03-03	Moved IP restrictions to virtual directories. Root is RO.
+  Rev 0.1.0.19	11:53 2014-03-04	Removed some alias dependencies.
+  Rev 0.1.0.21	17:34 2014-03-04	Fixed StopWatch() not using TotalSeconds
+  Rev 0.1.0.22	11:02 2014-03-11	As HQImport looks in c:\ProgramFilesX86\Office\Rcv, the path had to be altered
+  Rev 0.1.0.24	11:35 2014-03-12	IUSR needs to be added to FTP folders to guarantie anonymoujs access
+  Rev 0.1.0.25	22:47 2014-04-28	Changed ProgramFiles to 64-bit by noy using x86 folder
+  Rev 0.2.0.26	18:53 2014-10-15	Added IP for other SOSIF nodes
+  Rev 0.2.0.27	13:57 2014-10-16	Converted to project
+  Rev 0.2.0.28	17:59 2014-10-16	Enabled "User Name Directory" mode
+  Rev 0.2.0.29	10:44 2014-10-17	Created deadend in physical FTP root
+									Add default virtual folder
+  Rev 0.2.0.32	11:40 2014-10-17	Added Create-VirtualDirectory() in Global
+									Added AccessCheck
+  Rev 0.2.0.34	16:54 2014-10-17	Added POS_STP_FtpAccess string parsing to IP
+									Removed AccesCheck virtual folder
+  Rev 0.3.0.35	13:28 2014-10-21	Fixed alias type mismatch (not of type string when applied)
+  Rev 0.3.0.36	13:58 2014-10-21	Fixed failback detection
+  Rev 0.4.0.37	21:21 2014-10-21	Changed folder name xml to xmt
+  Rev 1.0.1.38	14:59 2015-01-15	Removed FTP folder creation
+  Rev 1.0.1.39	16:37 2015-01-16	Changed  hostname resolution to check both ikea.com and ikeadt.com
+  Rev 1.0.0.40	18:23 2015-01-16	Removed double domain check. Hostname should include domain name.
+  Rev 2.0.0.43	15:44 2015-06-04	Added support for SAREC
+  Rev 2.0.0.44	22:40 2015-06-08	Relabelled Create-VirtualDirectory() as Create-FtpVirtualDirectory()
+  Rev 2.0.0.46	22:59 2015-06-08	SAREC and SOSIF have diffentent IP restrictions
+  Rev 2.0.0.47	15:44 2015-06-09	Added SAREC folder share
+  Rev 2.0.0.52	17:21 2015-06-09	SAREC and SOSIF do NOT have different IP restrictions
+  Rev 2.0.0.53	22:49 2015-06-10	Cleans out default virtual directory and child directories at each run
+  Rev 2.0.1.54	15:44 2015-10-09	Moved functions to Global and wrote comment-based help
+  Rev 2.0.1.56	10:00 2015-12-05	Moved SAREC share creation to own function
+									Fixed SAREC share beeing SAREC_Outbound$ instead of XMT$
+									Added default parameter  $FtpPath = "$ProgramFiles\Office" to Set-SarecFtpFolder
+  Rev 2.0.1.57	10:13 2016-05-18	Migrated project to PowershellStudio 2016 
+  									Replaced path to IFS-PSlib.ps1 to generic v:\ for use with 
+									cmd:subst V: "S:\[YOURID]_pStorePoint_int"  / Olof Randver
+  Rev 2.0.1.58  17:20 2017-06-27    Added new Alias POS_STP_FtpAccess_SOSIF_FTP  
+
+TODO:
+	Stop FTP during configuration?
+	Errormessage on folders already exists with content unless "force flag"
+
+.SYNOPSIS
+  [Short description]
+
+.DESCRIPTION
+  [Long description]
+
+.PARAMETER [None]
+  [Paramters and syntax for script]
+
+.EXAMPLE
+  [Examples of using script]
+  [Just add more EXAMPLE]
+
+
+.INPUTS 
+  Fetches data from aliases.
+ 
+.OUTPUTS 
+  Creates an FTP site in d:\ftp with the virtual directories %ProgramFiles%\Office /rcv /xml and /log
+#>
+
+#Define a Param block to use custom parameters in the project
+#Param ($CustomParameter)
+
+function Main {
+	Param ([String]$Commandline)
+	$Commandline = $Commandline.ToLower()
+	#Note: This function starts the application
+	#Note: $Commandline contains the complete argument string passed to the packager
+	#Note: To get the script directory in the Packager use: Split-Path $hostinvocation.MyCommand.path
+	#Note: To get the console output in the Packager (Windows Mode) use: $ConsoleOutput (Type: System.Collections.ArrayList)
+	#TODO: Initialize and add Function calls to forms
+	
+	$Script:StopWatch = [System.Diagnostics.StopWatch]::StartNew()
+	
+	[string]$global:MyVersion = "2.0.1.57"
+	
+	
+	# Init
+	Add-Log "Start" -Level 1
+	Add-Log "IFS PS Library version: $IfsPsLibVer"
+
+	Set-ScriptVariable
+	<#	Set the following script variables
+			$FTPpath
+			$FTPSiteAuthorizationRule, ICC Alias FTPSiteAuthorizationRule_1
+			$FTPSiteBannerMsg, ICC Alias FTPSiteBannerMsg_1
+			$FTPSiteDirBrowseVirtualDir, ICC Alias FTPSiteDirBrowseVirtualDir_1
+			$FTPSiteEnableAnonymousAuthetication, ICC Alias FTPSiteEnableAnonymousAuthetication_1
+			$FTPSiteEnableBasicAuthentication, ICC Alias FTPSiteEnableBasicAuthentication_1
+			$FTPSiteIP, ICC Alias FTPSiteIP_1
+			$FTPSiteLogDirectory, ICC Alias FTPSiteLogDirectory_1
+			$FTPSiteLogFileRetention, ICC Alias FTPSiteLogFileRetention_1
+			$FTPSiteMaxConnections, ICC Alias FTPSiteMaxConnections_1
+			$FTPSiteName, ICC Alias FTPSiteName_1
+			$FTPSitePhysPath, ICC Alias FTPSitePhysPath_1
+			$FTPSiteProtocol, ICC Alias FTPSiteProtocol_1
+			$FTPSiteSslBehaviour, ICC Alias FTPSiteSslBehaviour_1
+			$FTPSiteTcpPort, ICC Alias FTPSiteTcpPort_1
+			$BOS_FTPAccess_SOSIF, ICC Alias POS_STP_FtpAccess_SOSIF
+			$BOS_FTPAccess_SAREC, ICC Alias POS_STP_FtpAccess_SAREC
+			$BOS_FTPAccess_SOSIF_FTP, ICC Alias POS_STP_FtpAccess_SOSIF_FTP 
+			$BOS_FTP_Firewall
+			$RestrictedIP
+	#>
+	
+	Add-Log "Trying to load PS module WebAdminitration" -Level 4 
+	Import-Module WebAdministration #Only available when running in 64-bit!
+	
+# End Init
+
+
+# Main
+	Set-AnonymousFtpConfiguration -FTPSiteName $FTPSiteName -FTPSiteTcpPort $FTPSiteTcpPort -FTPSitePhysPath $FTPSitePhysPath
+	
+	Set-PriceBookFtpFolder -FTPSiteName $FTPSiteName -RestrictedIP $RestrictedIP
+	
+	Set-SarecFtpFolder -FTPSiteName $FTPSiteName -RestrictedIP $RestrictedIP
+	
+	Set-SarecShare -ShareName "XMT$" -FolderPath "$FTPPath\xmt"
+	
+	Restart-WebItem "IIS:\Sites\$FTPSiteName"
+	Add-Log "Restarting $FTPSiteName FTP" -Level 1
+
+# End Main
+
+
+# Exit
+	$StopWatch.Stop()
+	Add-Log (Get-ExecutionTime $StopWatch) -Level 1
+	
+	$global:ExitCode = 0 #Set the exit code for the Packager
+# End Exit
+}
+
+
+
+
+
+
+]]></Code>
+  <Assemblies>
+    <Assembly>mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Assembly>
+    <Assembly>System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+  </Assemblies>
+</File>

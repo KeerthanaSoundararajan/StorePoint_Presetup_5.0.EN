@@ -1,0 +1,51 @@
+﻿<Project>
+  <Version>1</Version>
+  <FileID>72fad542-049f-45ad-bcf6-9070e1ef5fdd</FileID>
+  <ProjectType>0</ProjectType>
+  <Files>
+    <File ReferenceName="" Build="0">Startup.pfs</File>
+    <File ReferenceName="Call-Global_ps1" Build="0" CommandExtension="True">Globals.ps1</File>
+    <File ReferenceName="Call-IFS-PSlib_ps1" Build="0" CommandExtension="True">V:\StorePoint\StorePoint_Tools\_IFS PSLib\IFS-PSlib.ps1</File>
+    <File ReferenceName="Call-lib_SchedTask_ps1" Build="0" CommandExtension="True">V:\StorePoint\StorePoint_Tools\_IFS PSLib\lib.SchedTask.ps1</File>
+  </Files>
+  <Packager>
+    <General>
+      <PackageName>Setup_Presetup</PackageName>
+      <PackageIcon>
+      </PackageIcon>
+      <ManifestCreation>2</ManifestCreation>
+      <CustomManifest>
+      </CustomManifest>
+      <Platform>1</Platform>
+      <RunSTA>0</RunSTA>
+      <PowerShellVersion>2</PowerShellVersion>
+    </General>
+    <Security>
+      <Username>
+      </Username>
+      <Password>
+      </Password>
+      <SignPackage>False</SignPackage>
+      <Certificate>
+      </Certificate>
+      <CertificatePassword>
+      </CertificatePassword>
+      <RunAs>0</RunAs>
+    </Security>
+    <Version>
+      <FileVersion>3.0.0.11</FileVersion>
+      <ProductVersion>3.0.0.11</ProductVersion>
+      <ProductName>Setup_Presetup</ProductName>
+      <Description>
+      </Description>
+      <Company>IKEA IT</Company>
+      <Copyright>
+      </Copyright>
+      <InternalName>
+      </InternalName>
+      <OriginalFileName>
+      </OriginalFileName>
+      <Comment>Created by DELIN5</Comment>
+    </Version>
+  </Packager>
+</Project>

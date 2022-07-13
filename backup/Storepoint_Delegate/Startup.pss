@@ -1,0 +1,102 @@
+﻿<File version="2.1">
+  <Code><![CDATA[<#
+.NOTES 
+  Created with: SAPIEN Technologies, Inc., PowerShell Studio 2012 v3.1.34
+  Created on:   2016-10-05 15:16
+  Created by:   Dennis Lindqvist
+  Organization: 
+  Filename: 
+#>
+
+
+#Define a Param block to use custom parameters in the project
+#Param ($CustomParameter)
+
+function Main {
+	Param ( [String]$Commandline
+			#[String]$Remove = "",
+			#[String]$Setup = ""
+		  )
+	#Note: This function starts the application
+	#Note: $Commandline contains the complete argument string passed to the packager
+	#Note: To get the script directory in the Packager use: Split-Path $hostinvocation.MyCommand.path
+	#Note: To get the console output in the Packager (Windows Mode) use: $ConsoleOutput (Type: System.Collections.ArrayList)
+	#TODO: Initialize and add Function calls to forms
+	$StopWatch = [System.Diagnostics.StopWatch]::StartNew()
+	
+	[string]$global:MyVersion = "1,0,0,0"
+	# Init
+	Add-Log "Start" -Level 1
+	Add-Log "IFS PS Library version: $IfsPsLibVer"
+
+	$AliasRegKey = "HKLM:\SOFTWARE\IKEA\IDEM\Config\Aliases"
+	Set-ScriptVariable
+#	Wake-Idem
+
+	$LoggingValueData = (Get-RegValueData -RegKey $AliasRegKey -ValueName POS_Logging)
+	if ($LoggingValueData) {$Global:LogLevel = [int]$LoggingValueData} # protect variable from $null values and characters
+	Add-Log ("Log level set to " + $LogLevel) -Level 1
+
+
+	# Get aliases
+
+
+# End Init
+	
+	# Main	
+	Add-Log ("Main function containing Commandline : $Commandline") -level 5
+	if ($Commandline -like '"-remove"')
+	{
+		Add-Log ("Entering Remove condition") -Level 5
+		Remove-Delegate
+		Exit
+	}
+	Add-Log ("Entering Add condition") -Level 5
+	Add-Delegate
+	
+	
+	# Setup Delegate on BOS
+	
+# End Main
+
+
+# Exit
+	$StopWatch.Stop()
+	if ($StopWatch.Elapsed.TotalSeconds -gt 3600)
+		{
+		Add-Log ("Process closing. Up time: " + $StopWatch.Elapsed.Days + " days, "`
+		+ $StopWatch.Elapsed.Hours + " hours, "`
+		+ $StopWatch.Elapsed.Minutes + " minutes, "`
+		+ $StopWatch.Elapsed.Seconds + " seconds.") -Level 1
+	}
+	else
+		{
+		Add-Log ("Process closing. Up time: " + $StopWatch.Elapsed.TotalSeconds + " seconds.") -Level 1
+	}
+	
+	$global:ExitCode = 0 #Set the exit code for the Packager
+# End Exit
+}
+
+
+
+
+
+
+]]></Code>
+  <Bookmarks />
+  <BreakPoints>
+    <Line Disabled="True">46</Line>
+    <Line Disabled="True">47</Line>
+  </BreakPoints>
+  <TracePoints />
+  <Assemblies>
+    <Assembly>mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Assembly>
+    <Assembly>System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+  </Assemblies>
+</File>

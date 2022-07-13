@@ -1,0 +1,12 @@
+﻿<Project Synchronized="False" SyncFilter="*.ps1;*.psm1;*.psd1;*.ps1xml;*.psf;*.pss;*.xml;*.help.txt">
+  <Version>2.0</Version>
+  <FileID>72fad542-049f-45ad-bcf6-9070e1ef5fdd</FileID>
+  <ProjectType>0</ProjectType>
+  <Folders />
+  <Files>
+    <File Build="0">Startup.pfs</File>
+    <File Build="0" Shared="True" ReferenceFunction="Call-Global_ps1">Globals.ps1</File>
+    <File Build="0" Shared="True" ReferenceFunction="Call-IFS-PSlib_ps1">V:\StorePoint\StorePoint_Tools\_IFS PSLib\IFS-PSlib.ps1</File>
+    <File Build="0" Shared="True" ReferenceFunction="Call-lib_SchedTask_ps1">V:\StorePoint\StorePoint_Tools\_IFS PSLib\lib.SchedTask.ps1</File>
+  </Files>
+</Project>

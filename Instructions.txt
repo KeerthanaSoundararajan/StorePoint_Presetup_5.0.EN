@@ -1,0 +1,89 @@
+Storepoint_Presetup_4.0 Build and Configure instructions
+========================================================
+
+Create the aliases as specifed in the alias text file.
+
+Setup
+=====
+The following aliases are required
+  REG_GeoID must be in place.
+
+If the machine is -NT4 then the following aliases are also required
+  FTPSiteName_1 must be in place.
+  WWWRoot must be in place.
+  FTPSiteEnableAnonymousAuthetication_1 must be set to True.
+  FTPSiteEnableBasicAuthentication_1 must be set to False.
+  FTPSiteHostHeader_1 must be set to *
+  FTPSiteIP_1 must be set to IPAddress1
+  FTPSiteProtocol_1 must be set to ftp
+  FTPSiteSslBehaviour_1 must be set to Allow
+  FTPSiteTcpPort_1 must be set to 21
+  FTPSitePhysPath_1 must be set
+  POS_STP_ServerName must be set
+  POS_STP_SiteID must be set
+  POS_STP_RetailerID must be set  //new//
+
+If the machine is -DN|-NB|-DW|-WS|-HM|-NT1
+  POS_STP_ServerName must be set
+  POS_STP_SiteID must be set
+
+Set the priority to 8005 as the module needs to be run after the FTP module (priority 7010).  //updated March 20//
+Set a WMI module dependecies to the WIN2016_FTP_1.0.EN module if the machine is an -NT4 type.
+
+Create below folder if doesn't exists.
+   C:\Program Files(x86)\Storepoint_Presetup //new//
+
+Copy 
+  Setup_FTP_Config.exe		v4,0,0,0
+  Setup_Presetup.exe		v4.0.0.0
+  Storepoint_Delegate.exe	v4,0,0,0
+  Storepoint_FTP_Config.exe	v4,0,0,0
+  Storepoint_Presetup.exe	v4,0,0,0  //new//
+  Presetup_Delegate.xml  //new//
+to 
+  C:\Program Files(x86)\Storepoint_Presetup
+
+Create below folder if it doesn't exists
+  D:\Data\inetpub\wwwroot\DoNotUseThisWebSite ///new///  //updated March 20//
+
+Run 
+  Storepoint_Presetup.exe
+  Setup_Presetup.exe
+
+If the machine is -NT4 then run
+  Setup_FTP_Config.exe
+
+Run the below command-
+  schtasks /Create /XML "C:\Program Files (x86)\Storepoint_Presetup\Presetup_Delegate.xml" /TN "IFS\Presetup_Delegate" /RU "SYSTEM" /F  //new//  //updated March 20//
+
+Create below registry keys if doesn't exists-  //new//
+  [HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\RetalixInstallShield]
+  "DisableMessageBox"="yes"
+  "DisableBoot"="yes"
+
+
+Uninstall
+=========
+
+Delete below folder if exists else skip
+  D:\Data\inetpub\wwwroot\DoNotUseThisWebSite  //new//   //updated March 20//
+
+
+Run the below commands  //new//
+  schtasks /query | findstr /B /I "Presetup_Delegate" >nul && schtasks /DELETE /TN "IFS\Presetup_Delegate" /F > nul    //updated March 20//
+  schtasks /query | findstr /B /I "FTP Configuration" >nul && schtasks /DELETE /TN "FTP_Config\FTP Configuration" /F > nul   //This is only for -NT4//    //updated March 20//
+  "C:\Windows\System32\inetsrv\appcmd.exe" delete site "StorepointBOS"        //This is only for -NT4//     //updated May 13//
+
+Run the binary  //new//
+  C:\Program Files(x86)\Storepoint_Presetup\Storepoint_Delegate.exe -Remove
+
+Run 
+  C:\Program Files(x86)\Storepoint_Presetup\Setup_Presetup.exe -remove
+
+Remove all binaries from below path
+  C:\Program Files(x86)\Storepoint_Presetup
+
+Remove below reg keys
+  HKLM\SOFTWARE\Wow6432Node\StorePoint\ 
+  HKLM\SOFTWARE\Wow6432Node\Positive\VersionControl
+  HKLM\SOFTWARE\Wow6432Node\RetalixInstallShield

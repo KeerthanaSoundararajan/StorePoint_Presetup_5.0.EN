@@ -1,0 +1,139 @@
+﻿
+  <FileVersion>1.2</FileVersion>
+  <Code><![CDATA[#Define a Param block to use custom parameters in the project
+#Param ($CustomParameter)
+
+param(
+	[String]$Remove="",
+	[String]$SetupPath=""
+)
+
+function Main {
+	Param ([String]$Commandline)
+	#Note: This function starts the application
+	#Note: $Commandline contains the complete argument string passed to the packager
+	#Note: To get the script directory in the Packager use: Split-Path $hostinvocation.MyCommand.path
+	#Note: To get the console output in the Packager (Windows Mode) use: $ConsoleOutput (Type: System.Collections.ArrayList)
+	#TODO: Initialize and add Function calls to forms
+		
+	begin {
+		$StopWatch = [System.Diagnostics.StopWatch]::StartNew()	
+			
+		Add-Log "Start" -Level 1
+		Add-Log "IFS PS Library version: $IfsPsLibVer"
+		Add-Log "SchedTask Library version: $libSchedTaskVer"
+
+		Set-ScriptVariable
+		<#
+		Set the following aliases
+			$POSshellApplication, ICC alias POS_Shell_Application
+		#>
+
+	}# _begin
+	
+
+	process {
+		if (($Remove -eq $True) -or ($Remove -like "-remove")){# Remove scheduled task
+			Remove-Task -Folder "IFS" -Name "Presetup_Delegate"
+			Add-Log "Trying to remove Scheduled Task: IFS\Presetup_Delegate" -Level 1
+			
+			sleep 1
+			
+			$RemoveTask = New-Task | Add-TaskTrigger -OnRegistration | Add-TaskAction -Path ("$ENV:ProgramFiles\Storepoint_Presetup\Storepoint_Delegate.exe") `
+			-Arguments "-remove" | Register-ScheduledTask -name "IFS\Remove_Delegate" -UserName "SYSTEM"
+			Add-Log "Running Delegate -remove" -Level 4
+			
+			sleep 1
+			
+			$RemoveTask | Remove-Task
+			Add-Log "Cleaning up RemoveTask" -Level 5
+			
+			$StopWatch.Stop()
+			Add-log (Get-ExecutionTime -StopWatch $StopWatch) -Level 1
+			Exit
+		}
+			
+		#Add scheduled task
+		New-Task | Add-TaskTrigger -OnBoot | Add-TaskAction -Path ("$ENV:ProgramFiles\Storepoint_Presetup\Storepoint_Delegate.exe") `
+		-Arguments "-add" | Register-ScheduledTask -name "IFS\Presetup_Delegate" -UserName "SYSTEM"
+		Add-Log "Trying to add Scheduled Task: IFS\Presetup_Delegate" -Level 1
+		
+		sleep 1
+		Get-ScheduledTask -Folder "IFS" -Name "Presetup_Delegate" | Start-Task
+		Add-Log "Starting Scheduled Task: IFS\Presetup_Delegate" -Level 3
+		
+	}# _process
+
+
+	end {
+		$StopWatch.Stop()
+		Add-log (Get-ExecutionTime -StopWatch $StopWatch) -Level 1
+		
+		$global:ExitCode = 0 #Set the exit code for the Packager
+
+	}# _end
+
+}
+
+
+
+
+
+
+]]></Code>
+  <Assemblies>
+    <Assembly>System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35</Assembly>
+    <Assembly>System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Assembly>
+    <Assembly>mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</Assembly>
+    <Assembly>System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Assembly>
+  </Assemblies>
+  <Packager>
+    <General>
+      <PackageName>
+      </PackageName>
+      <PackageIcon>
+      </PackageIcon>
+      <ManifestCreation>1</ManifestCreation>
+      <CustomManifest>
+      </CustomManifest>
+      <Platform>-1</Platform>
+      <RunSTA>0</RunSTA>
+      <PowerShellVersion>2</PowerShellVersion>
+    </General>
+    <Security>
+      <Username>
+      </Username>
+      <Password>
+      </Password>
+      <SignPackage>False</SignPackage>
+      <Certificate>
+      </Certificate>
+      <CertificatePassword>
+      </CertificatePassword>
+      <RunAs>0</RunAs>
+    </Security>
+    <Version>
+      <FileVersion>
+      </FileVersion>
+      <ProductVersion>
+      </ProductVersion>
+      <ProductName>
+      </ProductName>
+      <Description>
+      </Description>
+      <Company>
+      </Company>
+      <Copyright>
+      </Copyright>
+      <InternalName>
+      </InternalName>
+      <OriginalFileName>
+      </OriginalFileName>
+      <Comment>
+      </Comment>
+    </Version>
+  </Packager>

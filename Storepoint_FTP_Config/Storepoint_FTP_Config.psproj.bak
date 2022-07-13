@@ -1,0 +1,11 @@
+﻿<Project>
+  <Version>2.0</Version>
+  <FileID>29bd74ff-2e1a-4043-8a98-ed26a3c1527f</FileID>
+  <ProjectType>0</ProjectType>
+  <Folders />
+  <Files>
+    <File Build="0">Startup.pss</File>
+    <File Build="0" Shared="True" ReferenceFunction="Invoke-Globals_ps1">Globals.ps1</File>
+    <File Build="0" Shared="False" ReferenceFunction="Invoke-IFS-PSlib_ps1">V:\StorePoint\StorePoint_Tools\_IFS PSLib\IFS-PSlib.ps1</File>
+  </Files>
+</Project>
